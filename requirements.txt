@@ -1,0 +1,21 @@
+# Django Core
+Django==5.0
+
+# Django REST Framework
+djangores tframework==3.14.0
+
+# CORS Headers (permite acceso desde frontend)
+django-cors-headers==4.3.1
+
+# Pillow (procesamiento de imágenes)
+Pillow==10.1.0
+
+# Dependencias opcionales recomendadas
+# markdown: Para renderizar documentación de la API
+markdown==3.5.1
+
+# django-filter: Para filtros avanzados en la API
+django-filter==23.5
+
+# pytz: Manejo de zonas horarias
+pytz==2023.3
