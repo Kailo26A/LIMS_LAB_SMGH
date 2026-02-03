@@ -17,7 +17,6 @@ from .serializers import (
 # =============================================================================
 # VIEWSET PARA CLIENTES (NUMERAL 2)
 # =============================================================================
-
 class ClienteViewSet(viewsets.ModelViewSet):
     """
     ViewSet completo para gestión de clientes.
@@ -79,11 +78,9 @@ class ClienteViewSet(viewsets.ModelViewSet):
         serializer = MuestraListSerializer(muestras, many=True)
         return Response(serializer.data)
 
-
 # =============================================================================
 # VIEWSET PARA MUESTRAS (NUMERALES 1, 3, 4, 7)
 # =============================================================================
-
 class MuestraViewSet(viewsets.ModelViewSet):
     """
     ViewSet completo para gestión de muestras.
@@ -158,7 +155,6 @@ class MuestraViewSet(viewsets.ModelViewSet):
     # -------------------------------------------------------------------------
     # NUMERAL 7: ACEPTACIÓN DE MUESTRA
     # -------------------------------------------------------------------------
-    
     @action(detail=True, methods=['post'])
     def aceptar(self, request, pk=None):
         """
@@ -212,7 +208,6 @@ class MuestraViewSet(viewsets.ModelViewSet):
     # -------------------------------------------------------------------------
     # NUMERAL 7: ACTUALIZACIÓN DE ESTADO CON HISTORIAL
     # -------------------------------------------------------------------------
-    
     @action(detail=True, methods=['post'])
     def actualizar_estado(self, request, pk=None):
         """
@@ -263,7 +258,6 @@ class MuestraViewSet(viewsets.ModelViewSet):
     # -------------------------------------------------------------------------
     # NUMERAL 5: ENSAYOS
     # -------------------------------------------------------------------------
-    
     @action(detail=True, methods=['get'])
     def ensayos(self, request, pk=None):
         """
@@ -280,6 +274,22 @@ class MuestraViewSet(viewsets.ModelViewSet):
         """
         Endpoint: POST /api/muestras/{id}/agregar_ensayos/
         Agrega uno o más ensayos a una muestra existente.
+        Payload:
+        {
+            "ensayos": [
+                {
+                    "nombre_analisis": "pH",
+                    "norma_metodo": "USP <791>",
+                    "prioridad": "ALTA",
+                    "fecha_resultados_requerida": "2024-03-01"
+                },
+                {
+                    "nombre_analisis": "Viscosidad",
+                    "prioridad": "NORMAL",
+                    "fecha_resultados_requerida": "2024-03-05"
+                }
+            ]
+        }
         """
         muestra = self.get_object()
         serializer = AgregarEnsayoSerializer(data=request.data)
@@ -309,12 +319,15 @@ class MuestraViewSet(viewsets.ModelViewSet):
     # -------------------------------------------------------------------------
     # NUMERAL 6: VALIDACIÓN DE SUFICIENCIA
     # -------------------------------------------------------------------------
-    
     @action(detail=True, methods=['post'])
     def validar_suficiencia(self, request, pk=None):
         """
         Endpoint: POST /api/muestras/{id}/validar_suficiencia/
         Valida si la cantidad enviada es suficiente para los análisis.
+        Payload:
+        {
+            "cantidad_requerida": 250.50
+        }
         """
         muestra = self.get_object()
         serializer = ValidacionSuficienciaSerializer(
@@ -343,7 +356,6 @@ class MuestraViewSet(viewsets.ModelViewSet):
     # -------------------------------------------------------------------------
     # NUMERAL 7: HISTORIAL COMPLETO
     # -------------------------------------------------------------------------
-    
     @action(detail=True, methods=['get'])
     def historial(self, request, pk=None):
         """
@@ -355,11 +367,9 @@ class MuestraViewSet(viewsets.ModelViewSet):
         serializer = HistorialEstadoSerializer(historial, many=True)
         return Response(serializer.data)
 
-
 # =============================================================================
 # VIEWSET PARA ENSAYOS (NUMERAL 5)
 # =============================================================================
-
 class EnsayoViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestión de ensayos individuales.
@@ -404,6 +414,10 @@ class EnsayoViewSet(viewsets.ModelViewSet):
         """
         Endpoint: POST /api/ensayos/{id}/asignar_analista/
         Asigna un analista a un ensayo.
+        Payload:
+        {
+            "analista_id": 2
+        }
         """
         ensayo = self.get_object()
         analista_id = request.data.get('analista_id')
@@ -419,6 +433,7 @@ class EnsayoViewSet(viewsets.ModelViewSet):
             analista = User.objects.get(id=analista_id)
             ensayo.analista_asignado = analista
             ensayo.save()
+            
             return Response({
                 'mensaje': 'Analista asignado exitosamente',
                 'analista': analista.username
@@ -434,6 +449,11 @@ class EnsayoViewSet(viewsets.ModelViewSet):
         """
         Endpoint: POST /api/ensayos/{id}/registrar_resultados/
         Registra los resultados de un ensayo.
+        Payload:
+        {
+            "resultados": "pH: 7.2, Viscosidad: 1500 cPs",
+            "observaciones": "Ensayo realizado según USP <791>"
+        }
         """
         ensayo = self.get_object()
         resultados = request.data.get('resultados')
@@ -456,11 +476,9 @@ class EnsayoViewSet(viewsets.ModelViewSet):
             'ensayo': EnsayoSerializer(ensayo).data
         })
 
-
 # =============================================================================
 # VIEWSET PARA HISTORIAL (Solo lectura)
 # =============================================================================
-
 class HistorialEstadoViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet de solo lectura para historial de estados.
@@ -476,7 +494,9 @@ class HistorialEstadoViewSet(viewsets.ReadOnlyModelViewSet):
         - /api/historial/?muestra=1
         """
         queryset = HistorialEstado.objects.select_related('muestra', 'usuario').all()
+        
         muestra = self.request.query_params.get('muestra', None)
         if muestra:
             queryset = queryset.filter(muestra_id=muestra)
+        
         return queryset.order_by('-fecha_cambio')
