@@ -7,7 +7,6 @@ import uuid
 # =============================================================================
 # NUMERAL 2: INFORMACIÓN DEL CLIENTE
 # =============================================================================
-
 class Cliente(models.Model):
     """
     Almacena la información de los clientes que envían muestras al laboratorio.
@@ -89,17 +88,14 @@ class Cliente(models.Model):
     def __str__(self):
         return f"{self.nombre_empresa} - {self.nit}"
 
-
 # =============================================================================
 # NUMERALES 1, 3, 4: INFORMACIÓN DE LA MUESTRA
 # =============================================================================
-
 class Muestra(models.Model):
     """
     Modelo principal que representa una muestra recibida en el laboratorio.
     Integra toda la información de recepción, trazabilidad y estado.
     """
-    
     # -----------------------------------------------------------------
     # NUMERAL 1: IDENTIFICACIÓN GENERAL
     # -----------------------------------------------------------------
@@ -329,11 +325,9 @@ class Muestra(models.Model):
     def __str__(self):
         return f"{self.codigo_muestra} - {self.cliente.nombre_empresa}"
 
-
 # =============================================================================
 # NUMERAL 5: ENSAYOS SOLICITADOS
 # =============================================================================
-
 class Ensayo(models.Model):
     """
     Representa los análisis o pruebas solicitadas para una muestra.
@@ -426,11 +420,9 @@ class Ensayo(models.Model):
     def __str__(self):
         return f"{self.nombre_analisis} - {self.muestra.codigo_muestra}"
 
-
 # =============================================================================
 # NUMERAL 7: HISTORIAL DE CAMBIOS (Trazabilidad completa)
 # =============================================================================
-
 class HistorialEstado(models.Model):
     """
     Registra todos los cambios de estado de una muestra para trazabilidad completa.
