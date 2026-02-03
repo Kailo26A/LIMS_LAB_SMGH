@@ -6,7 +6,6 @@ from django.utils import timezone
 # =============================================================================
 # SERIALIZER PARA USUARIOS
 # =============================================================================
-
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializa información básica de usuarios para mostrar en respuestas.
@@ -16,11 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name', 'email']
         read_only_fields = fields
 
-
 # =============================================================================
 # SERIALIZER PARA CLIENTES
 # =============================================================================
-
 class ClienteSerializer(serializers.ModelSerializer):
     """
     Maneja la conversión de datos de Cliente entre Python y JSON.
@@ -45,7 +42,6 @@ class ClienteSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Ya existe un cliente con este NIT.")
         return value
 
-
 # Versión simplificada para listados
 class ClienteListSerializer(serializers.ModelSerializer):
     """
@@ -55,11 +51,9 @@ class ClienteListSerializer(serializers.ModelSerializer):
         model = Cliente
         fields = ['id', 'nombre_empresa', 'nit', 'persona_contacto', 'email', 'tipo_cliente', 'activo']
 
-
 # =============================================================================
 # SERIALIZER PARA ENSAYOS
 # =============================================================================
-
 class EnsayoSerializer(serializers.ModelSerializer):
     """
     Serializa los ensayos solicitados para una muestra.
@@ -81,7 +75,6 @@ class EnsayoSerializer(serializers.ModelSerializer):
             )
         return value
 
-
 # Versión simplificada para cuando se incluye en Muestra
 class EnsayoSimpleSerializer(serializers.ModelSerializer):
     """
@@ -92,11 +85,9 @@ class EnsayoSimpleSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre_analisis', 'norma_metodo', 'prioridad',
                   'estado_ensayo', 'fecha_resultados_requerida']
 
-
 # =============================================================================
 # SERIALIZER PARA HISTORIAL DE ESTADOS
 # =============================================================================
-
 class HistorialEstadoSerializer(serializers.ModelSerializer):
     """
     Serializa el historial de cambios de estado de una muestra.
@@ -108,11 +99,9 @@ class HistorialEstadoSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['fecha_cambio']
 
-
 # =============================================================================
 # SERIALIZER PARA MUESTRAS
 # =============================================================================
-
 class MuestraSerializer(serializers.ModelSerializer):
     """
     Serializer principal para muestras.
@@ -190,7 +179,6 @@ class MuestraSerializer(serializers.ModelSerializer):
         
         return data
 
-
 # Versión para creación de muestra (sin campos de solo lectura expandidos)
 class MuestraCreateSerializer(serializers.ModelSerializer):
     """
@@ -235,7 +223,6 @@ class MuestraCreateSerializer(serializers.ModelSerializer):
         
         return data
 
-
 # Versión simplificada para listados
 class MuestraListSerializer(serializers.ModelSerializer):
     """
@@ -247,7 +234,6 @@ class MuestraListSerializer(serializers.ModelSerializer):
         model = Muestra
         fields = ['id', 'codigo_muestra', 'cliente_nombre', 'tipo_muestra',
                   'estado', 'fecha_registro', 'fecha_recepcion', 'muestra_aceptada']
-
 
 # =============================================================================
 # SERIALIZERS PARA ACCIONES ESPECÍFICAS
@@ -271,7 +257,6 @@ class AceptarMuestraSerializer(serializers.Serializer):
             )
         return value
 
-
 class ActualizarEstadoSerializer(serializers.Serializer):
     """
     Serializer para actualizar el estado de una muestra.
@@ -279,7 +264,6 @@ class ActualizarEstadoSerializer(serializers.Serializer):
     """
     estado = serializers.ChoiceField(choices=Muestra.ESTADO_CHOICES)
     observaciones = serializers.CharField(required=False, allow_blank=True)
-
 
 class AgregarEnsayoSerializer(serializers.Serializer):
     """
@@ -305,7 +289,6 @@ class AgregarEnsayoSerializer(serializers.Serializer):
                     )
         return value
 
-
 class ValidacionSuficienciaSerializer(serializers.Serializer):
     """
     NUMERAL 6: Validación automática de cantidad suficiente.
@@ -326,4 +309,5 @@ class ValidacionSuficienciaSerializer(serializers.Serializer):
                 'cantidad_insuficiente': f'Se requieren {cantidad_requerida} {muestra.unidad_cantidad}, '
                                         f'pero solo se recibieron {muestra.cantidad_enviada} {muestra.unidad_cantidad}.'
             })
+        
         return data
