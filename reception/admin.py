@@ -2,264 +2,306 @@ from django.contrib import admin
 from .models import Cliente, Muestra, Ensayo, HistorialEstado
 
 # =============================================================================
-# CONFIGURACIÓN DEL PANEL ADMIN PARA CLIENTES
+# CONFIGURACIÓN DEL PANEL DE ADMINISTRACIÓN PARA CLIENTE
 # =============================================================================
-
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
     """
-    Personalización del panel de administración para Clientes
+    Configuración del panel de administración para el modelo Cliente.
     """
-    list_display = ['nombre_empresa', 'nit', 'ciudad', 'tipo_cliente', 'activo', 'persona_contacto', 'email']
-    list_filter = ['tipo_cliente', 'activo', 'ciudad', 'pais']
+    # Campos a mostrar en la lista
+    list_display = [
+        'nombre_empresa',
+        'nit',
+        'ciudad',
+        'pais',
+        'persona_contacto',
+        'email',
+        'tipo_cliente',
+        'activo'
+    ]
+    
+    # Campos por los que se puede filtrar
+    list_filter = ['tipo_cliente', 'activo', 'pais', 'ciudad']
+    
+    # Campos de búsqueda
     search_fields = ['nombre_empresa', 'nit', 'persona_contacto', 'email']
+    
+    # Campos de solo lectura
+    readonly_fields = ['fecha_registro', 'fecha_actualizacion']
+    
+    # Orden por defecto
     ordering = ['nombre_empresa']
     
+    # Organización de campos en el formulario
     fieldsets = (
-        ('Información Básica', {
+        ('Información General', {
             'fields': ('nombre_empresa', 'nit', 'tipo_cliente', 'activo')
         }),
         ('Ubicación', {
             'fields': ('direccion', 'ciudad', 'pais')
         }),
-        ('Contacto', {
+        ('Información de Contacto', {
             'fields': ('persona_contacto', 'cargo_contacto', 'email', 'telefono')
         }),
         ('Auditoría', {
             'fields': ('fecha_registro', 'fecha_actualizacion'),
-            'classes': ('collapse',)  # Sección colapsable
+            'classes': ('collapse',)  # Inicia colapsado
         }),
     )
-    readonly_fields = ['fecha_registro', 'fecha_actualizacion']
-
 
 # =============================================================================
-# CONFIGURACIÓN DEL PANEL ADMIN PARA MUESTRAS
+# CONFIGURACIÓN DEL PANEL DE ADMINISTRACIÓN PARA MUESTRA
 # =============================================================================
-
-class EnsayoInline(admin.TabularInline):
-    """
-    Permite ver y editar ensayos directamente desde la muestra
-    """
-    model = Ensayo
-    extra = 1  # Muestra 1 fila vacía para agregar ensayos
-    fields = ['nombre_analisis', 'norma_metodo', 'prioridad', 'fecha_resultados_requerida', 'estado_ensayo', 'analista_asignado']
-
-
-class HistorialInline(admin.TabularInline):
-    """
-    Muestra el historial de cambios directamente en la muestra
-    """
-    model = HistorialEstado
-    extra = 0  # No mostrar filas vacías
-    can_delete = False  # No permitir eliminar registros de historial
-    readonly_fields = ['estado_anterior', 'estado_nuevo', 'usuario', 'fecha_cambio', 'observaciones']
-    fields = ['estado_anterior', 'estado_nuevo', 'usuario', 'fecha_cambio', 'observaciones']
-
-
 @admin.register(Muestra)
 class MuestraAdmin(admin.ModelAdmin):
     """
-    Personalización del panel de administración para Muestras
+    Configuración del panel de administración para el modelo Muestra.
     """
+    # Campos a mostrar en la lista
     list_display = [
-        'codigo_muestra', 'cliente', 'tipo_muestra', 'estado', 
-        'muestra_aceptada', 'fecha_registro', 'usuario_recepcion'
+        'codigo_muestra',
+        'cliente',
+        'tipo_muestra',
+        'estado',
+        'fecha_registro',
+        'muestra_aceptada',
+        'usuario_recepcion'
     ]
+    
+    # Filtros
     list_filter = [
-        'estado', 'tipo_muestra', 'muestra_aceptada', 
-        'condiciones_recepcion', 'riesgo_asociado', 'fecha_registro'
+        'estado',
+        'tipo_muestra',
+        'muestra_aceptada',
+        'condiciones_recepcion',
+        'riesgo_asociado',
+        'fecha_registro',
     ]
-    search_fields = ['codigo_muestra', 'cliente__nombre_empresa', 'descripcion_muestra', 'lote']
+    
+    # Búsqueda
+    search_fields = [
+        'codigo_muestra',
+        'cliente__nombre_empresa',
+        'descripcion_muestra',
+        'lote'
+    ]
+    
+    # Campos de solo lectura
+    readonly_fields = [
+        'codigo_muestra',
+        'fecha_registro',
+        'fecha_recepcion',
+        'fecha_actualizacion',
+        'version_plataforma'
+    ]
+    
+    # Orden
     ordering = ['-fecha_registro']
+    
+    # Fecha de jerarquía (permite navegar por fechas)
     date_hierarchy = 'fecha_registro'
     
-    # Mostrar ensayos e historial en la misma página de la muestra
-    inlines = [EnsayoInline, HistorialInline]
+    # Campos que se pueden editar directamente en la lista
+    list_editable = ['estado']
     
+    # Organización de campos en el formulario
     fieldsets = (
         ('Identificación', {
-            'fields': ('codigo_muestra', 'cliente', 'estado', 'version_plataforma')
-        }),
-        ('Recepción', {
             'fields': (
-                'usuario_recepcion', 'fecha_envio', 'fecha_recepcion',
-                'medio_entrega', 'condiciones_recepcion', 'observaciones_recepcion'
+                'codigo_muestra',
+                'version_plataforma',
+                'estado',
+                'cliente',
+                'usuario_recepcion'
+            )
+        }),
+        ('Información del Envío', {
+            'fields': (
+                'fecha_envio',
+                'fecha_recepcion',
+                'medio_entrega',
+                'condiciones_recepcion',
+                'observaciones_recepcion'
             )
         }),
         ('Información de la Muestra', {
             'fields': (
-                'tipo_muestra', 'matriz', 'descripcion_muestra',
-                'cantidad_enviada', 'unidad_cantidad', 'lote'
+                'tipo_muestra',
+                'matriz',
+                'descripcion_muestra',
+                'cantidad_enviada',
+                'unidad_cantidad',
+                'lote',
+                'fecha_muestreo',
+                'responsable_muestreo',
+                'condiciones_almacenamiento',
+                'riesgo_asociado'
             )
-        }),
-        ('Muestreo', {
-            'fields': ('fecha_muestreo', 'responsable_muestreo')
-        }),
-        ('Condiciones', {
-            'fields': ('condiciones_almacenamiento', 'riesgo_asociado')
         }),
         ('Aceptación', {
             'fields': (
-                'muestra_aceptada', 'fecha_aceptacion', 
-                'usuario_aceptacion', 'firma_digital_cliente'
-            ),
-            'classes': ('collapse',)
+                'muestra_aceptada',
+                'fecha_aceptacion',
+                'usuario_aceptacion',
+                'firma_digital_cliente'
+            )
         }),
         ('Auditoría', {
-            'fields': ('fecha_registro', 'fecha_actualizacion'),
+            'fields': ('fecha_actualizacion',),
             'classes': ('collapse',)
         }),
     )
     
-    readonly_fields = [
-        'codigo_muestra', 'fecha_registro', 'fecha_recepcion', 
-        'fecha_actualizacion', 'version_plataforma'
-    ]
+    # Acciones personalizadas
+    actions = ['marcar_como_aceptada', 'marcar_como_rechazada']
     
-    # Acciones masivas personalizadas
-    actions = ['marcar_como_aceptadas', 'cambiar_estado_a_analisis']
-    
-    def marcar_como_aceptadas(self, request, queryset):
-        """
-        Acción para marcar múltiples muestras como aceptadas
-        """
+    def marcar_como_aceptada(self, request, queryset):
+        """Acción para marcar muestras como aceptadas"""
         from django.utils import timezone
-        updated = 0
-        for muestra in queryset:
-            if not muestra.muestra_aceptada:
-                muestra.muestra_aceptada = True
-                muestra.fecha_aceptacion = timezone.now()
-                muestra.usuario_aceptacion = request.user
-                muestra.estado = 'ACEPTADA'
-                muestra.save()
-                
-                # Registrar en historial
-                HistorialEstado.objects.create(
-                    muestra=muestra,
-                    estado_anterior=muestra.estado,
-                    estado_nuevo='ACEPTADA',
-                    usuario=request.user,
-                    observaciones='Aceptación masiva desde panel admin'
-                )
-                updated += 1
-        
-        self.message_user(request, f'{updated} muestra(s) marcada(s) como aceptadas.')
+        updated = queryset.update(
+            muestra_aceptada=True,
+            fecha_aceptacion=timezone.now(),
+            estado='ACEPTADA'
+        )
+        self.message_user(request, f'{updated} muestra(s) marcada(s) como aceptada(s).')
+    marcar_como_aceptada.short_description = "Marcar como aceptada(s)"
     
-    marcar_como_aceptadas.short_description = "Marcar como aceptadas"
-    
-    def cambiar_estado_a_analisis(self, request, queryset):
-        """
-        Acción para cambiar estado de múltiples muestras a "En Análisis"
-        """
-        updated = 0
-        for muestra in queryset:
-            if muestra.muestra_aceptada:
-                estado_anterior = muestra.estado
-                muestra.estado = 'EN_ANALISIS'
-                muestra.save()
-                
-                # Registrar en historial
-                HistorialEstado.objects.create(
-                    muestra=muestra,
-                    estado_anterior=estado_anterior,
-                    estado_nuevo='EN_ANALISIS',
-                    usuario=request.user,
-                    observaciones='Cambio masivo de estado desde panel admin'
-                )
-                updated += 1
-        
-        self.message_user(request, f'{updated} muestra(s) cambiadas a estado "En Análisis".')
-    
-    cambiar_estado_a_analisis.short_description = "Cambiar estado a En Análisis"
-
+    def marcar_como_rechazada(self, request, queryset):
+        """Acción para marcar muestras como rechazadas"""
+        updated = queryset.update(estado='RECHAZADA')
+        self.message_user(request, f'{updated} muestra(s) marcada(s) como rechazada(s).')
+    marcar_como_rechazada.short_description = "Marcar como rechazada(s)"
 
 # =============================================================================
-# CONFIGURACIÓN DEL PANEL ADMIN PARA ENSAYOS
+# CONFIGURACIÓN DEL PANEL DE ADMINISTRACIÓN PARA ENSAYO
 # =============================================================================
-
 @admin.register(Ensayo)
 class EnsayoAdmin(admin.ModelAdmin):
     """
-    Personalización del panel de administración para Ensayos
+    Configuración del panel de administración para el modelo Ensayo.
     """
+    # Campos a mostrar
     list_display = [
-        'nombre_analisis', 'muestra', 'prioridad', 'estado_ensayo',
-        'analista_asignado', 'fecha_resultados_requerida'
+        'id',
+        'muestra',
+        'nombre_analisis',
+        'prioridad',
+        'estado_ensayo',
+        'analista_asignado',
+        'fecha_resultados_requerida'
     ]
+    
+    # Filtros
     list_filter = [
-        'estado_ensayo', 'prioridad', 'analista_asignado',
-        'fecha_resultados_requerida', 'fecha_creacion'
+        'estado_ensayo',
+        'prioridad',
+        'fecha_resultados_requerida',
+        'analista_asignado'
     ]
+    
+    # Búsqueda
     search_fields = [
-        'nombre_analisis', 'norma_metodo', 'muestra__codigo_muestra',
-        'resultados', 'observaciones_ensayo'
+        'nombre_analisis',
+        'norma_metodo',
+        'muestra__codigo_muestra'
     ]
+    
+    # Campos de solo lectura
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
+    
+    # Orden
     ordering = ['prioridad', 'fecha_resultados_requerida']
+    
+    # Jerarquía de fecha
     date_hierarchy = 'fecha_resultados_requerida'
     
+    # Campos editables en lista
+    list_editable = ['prioridad', 'estado_ensayo', 'analista_asignado']
+    
+    # Organización de campos
     fieldsets = (
-        ('Información del Ensayo', {
-            'fields': ('muestra', 'nombre_analisis', 'norma_metodo', 'prioridad', 'fecha_resultados_requerida')
+        ('Información General', {
+            'fields': (
+                'muestra',
+                'nombre_analisis',
+                'norma_metodo',
+                'prioridad',
+                'fecha_resultados_requerida'
+            )
         }),
         ('Ejecución', {
             'fields': (
-                'estado_ensayo', 'analista_asignado',
-                'fecha_inicio', 'fecha_finalizacion'
+                'estado_ensayo',
+                'analista_asignado',
+                'fecha_inicio',
+                'fecha_finalizacion'
             )
         }),
         ('Resultados', {
-            'fields': ('resultados', 'observaciones_ensayo'),
-            'classes': ('collapse',)
+            'fields': (
+                'resultados',
+                'observaciones_ensayo'
+            )
         }),
         ('Auditoría', {
             'fields': ('fecha_creacion', 'fecha_actualizacion'),
             'classes': ('collapse',)
         }),
     )
-    
-    readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
-    
-    # Filtros rápidos en la barra lateral
-    list_per_page = 50
-
 
 # =============================================================================
-# CONFIGURACIÓN DEL PANEL ADMIN PARA HISTORIAL
+# CONFIGURACIÓN DEL PANEL DE ADMINISTRACIÓN PARA HISTORIAL
 # =============================================================================
-
 @admin.register(HistorialEstado)
 class HistorialEstadoAdmin(admin.ModelAdmin):
     """
-    Personalización del panel de administración para Historial de Estados
+    Configuración del panel de administración para el modelo HistorialEstado.
+    Solo lectura.
     """
+    # Campos a mostrar
     list_display = [
-        'muestra', 'estado_anterior', 'estado_nuevo',
-        'usuario', 'fecha_cambio'
+        'id',
+        'muestra',
+        'estado_anterior',
+        'estado_nuevo',
+        'usuario',
+        'fecha_cambio'
     ]
-    list_filter = ['estado_nuevo', 'estado_anterior', 'fecha_cambio', 'usuario']
+    
+    # Filtros
+    list_filter = ['estado_anterior', 'estado_nuevo', 'fecha_cambio']
+    
+    # Búsqueda
     search_fields = ['muestra__codigo_muestra', 'observaciones']
+    
+    # Todos los campos son de solo lectura
+    readonly_fields = [
+        'muestra',
+        'estado_anterior',
+        'estado_nuevo',
+        'usuario',
+        'fecha_cambio',
+        'observaciones'
+    ]
+    
+    # Orden
     ordering = ['-fecha_cambio']
+    
+    # Jerarquía de fecha
     date_hierarchy = 'fecha_cambio'
     
-    # Historial es solo lectura
+    # No permitir agregar, editar o eliminar
     def has_add_permission(self, request):
-        return False
-    
-    def has_delete_permission(self, request, obj=None):
         return False
     
     def has_change_permission(self, request, obj=None):
         return False
     
-    # Todos los campos son de solo lectura
-    readonly_fields = ['muestra', 'estado_anterior', 'estado_nuevo', 'usuario', 'fecha_cambio', 'observaciones']
-    
-    fieldsets = (
-        ('Información del Cambio', {
-            'fields': (
-                'muestra', 'estado_anterior', 'estado_nuevo',
-                'usuario', 'fecha_cambio', 'observaciones'
-            )
-        }),
-    )
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+# Configuración del sitio admin
+admin.site.site_header = "Administración LIMS - Laboratorio de Control de Calidad"
+admin.site.site_title = "LIMS Admin"
+admin.site.index_title = "Panel de Administración"
